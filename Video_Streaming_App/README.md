@@ -3,9 +3,9 @@
 A modern, full-stack video streaming platform built with React.js frontend and Node.js backend, deployed on Vercel.
 
 ## 🚀 Live Demo
-- **Frontend**: https://stream-zone-189oh9gh6-abhishek-kumars-projects-1de91d80.vercel.app
-- **Backend API**: https://stream-zone-189oh9gh6-abhishek-kumars-projects-1de91d80.vercel.app/api
-- **Health Check**: https://stream-zone-189oh9gh6-abhishek-kumars-projects-1de91d80.vercel.app/health
+- **Frontend**: https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app
+- **Backend API**: https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app/api
+- **Health Check**: https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app/health
 
 ## 📋 Features
 
@@ -173,7 +173,7 @@ Stream_Zone/
 ### Frontend Configuration
 The frontend automatically detects the environment and uses the appropriate API URL:
 - **Development**: `http://localhost:5000/api`
-- **Production**: `https://stream-zone-189oh9gh6-abhishek-kumars-projects-1de91d80.vercel.app/api`
+- **Production**: `https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app/api`
 
 ### Backend Configuration
 Environment variables needed for the backend:
