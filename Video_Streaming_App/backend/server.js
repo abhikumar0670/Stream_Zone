@@ -14,7 +14,12 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://stream-zone-189oh9gh6-abhishek-kumars-projects-1de91d80.vercel.app']
+    : ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true
+}));
 app.use(morgan('dev'));
 app.use(compression());
 app.use(express.json());

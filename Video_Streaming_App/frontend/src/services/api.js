@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+// Dynamic API URL based on environment
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://stream-zone-189oh9gh6-abhishek-kumars-projects-1de91d80.vercel.app/api'
+  : 'http://localhost:5000/api';
 
 // Create axios instance
 const api = axios.create({

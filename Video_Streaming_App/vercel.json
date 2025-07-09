@@ -19,11 +19,21 @@
       "dest": "/backend/server.js"
     },
     {
+      "src": "/health",
+      "dest": "/backend/server.js"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/backend/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/frontend/$1"
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret"
   }
 }
