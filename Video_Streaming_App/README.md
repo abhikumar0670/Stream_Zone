@@ -1,11 +1,118 @@
 # 🎬 Stream Zone - Full-Stack Video Streaming Platform
 
-A modern, full-stack video streaming platform built with React.js frontend and Node.js backend, deployed on Vercel.
+<div align="center">
+  <img src="https://img.shields.io/badge/React-18.2.0-blue?style=for-the-badge&logo=react" alt="React">
+  <img src="https://img.shields.io/badge/Node.js-18.0.0-green?style=for-the-badge&logo=node.js" alt="Node.js">
+  <img src="https://img.shields.io/badge/MongoDB-Atlas-green?style=for-the-badge&logo=mongodb" alt="MongoDB">
+  <img src="https://img.shields.io/badge/Vercel-Deployed-black?style=for-the-badge&logo=vercel" alt="Vercel">
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License">
+</div>
+
+<p align="center">
+  A modern, full-stack video streaming platform built with React.js frontend and Node.js backend, deployed on Vercel.
+</p>
 
 ## 🚀 Live Demo
-- **Frontend**: https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app
-- **Backend API**: https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app/api
-- **Health Check**: https://stream-zone-ohudtg9yg-abhishek-kumars-projects-1de91d80.vercel.app/health
+- **🌐 Frontend**: https://stream-zone-gfn6xah38-abhishek-kumars-projects-1de91d80.vercel.app
+- **⚡ Backend API**: https://stream-zone-gfn6xah38-abhishek-kumars-projects-1de91d80.vercel.app/api
+- **💚 Health Check**: https://stream-zone-gfn6xah38-abhishek-kumars-projects-1de91d80.vercel.app/health
+
+---
+
+## 📸 Screenshots
+
+### 🏠 Home Page
+*Clean and modern interface showcasing video content*
+
+### 🔐 Authentication
+*Secure user registration and login system*
+
+### 🎥 Video Player
+*Responsive video streaming with controls*
+
+### 📱 Responsive Design
+*Works perfectly on all devices*
+
+## 🔄 How It Works
+
+### User Journey
+
+1. **🔐 Registration/Login**
+   - Users can create new accounts or login with existing credentials
+   - JWT tokens are used for secure authentication
+   - Passwords are hashed using bcryptjs for security
+
+2. **🏠 Browse Videos**
+   - Public videos are displayed on the home page
+   - Users can filter by category, search by title, or filter by uploader
+   - Pagination ensures smooth browsing experience
+
+3. **🎥 Watch Videos**
+   - Click on any video to watch in the responsive video player
+   - View counts are automatically tracked
+   - Like/dislike functionality for user engagement
+
+4. **📤 Upload Videos**
+   - Authenticated users can upload their own videos
+   - Add titles, descriptions, categories, and tags
+   - Choose video visibility (public/private)
+
+5. **👤 User Profile**
+   - Manage uploaded videos
+   - View video analytics
+   - Update profile information
+
+### Technical Architecture
+
+```
+┌─────────────┐    HTTP/HTTPS    ┌─────────────┐    MongoDB    ┌─────────────┐
+│             │   Requests/API   │             │   Queries     │             │
+│   React.js  │◄────────────────►│   Node.js   │◄─────────────►│   MongoDB   │
+│   Frontend  │     JSON Data    │   Backend   │   Documents   │    Atlas    │
+│             │                  │             │               │             │
+└─────────────┘                  └─────────────┘               └─────────────┘
+       │                                │                              │
+       │                                │                              │
+   ┌───────┐                       ┌──────────┐                  ┌──────────┐
+   │ Redux │                       │   JWT    │                  │  Videos  │
+   │ Store │                       │  Auth    │                  │  Users   │
+   └───────┘                       └──────────┘                  │ Comments │
+                                                                 └──────────┘
+```
+
+### Data Flow
+
+1. **Authentication Flow**
+   ```
+   User Input → Frontend Validation → API Request → Backend Validation 
+   → Password Hash → JWT Token → Store in LocalStorage → API Headers
+   ```
+
+2. **Video Upload Flow**
+   ```
+   File Selection → Form Data → Multer Middleware → File Storage 
+   → Database Record → Response to Frontend → UI Update
+   ```
+
+3. **Video Streaming Flow**
+   ```
+   Video Request → Stream Endpoint → File System → Chunked Response 
+   → Video Player → View Count Update
+   ```
+
+### API Integration
+
+**Frontend ↔ Backend Communication:**
+- All API calls use Axios with interceptors
+- JWT tokens are automatically attached to requests
+- Error handling with automatic token refresh
+- Environment-based API URL configuration
+
+**Database Operations:**
+- MongoDB Atlas for cloud database
+- Mongoose for object modeling
+- Automatic connection retry logic
+- Optimized queries with pagination
 
 ## 📋 Features
 
@@ -202,6 +309,37 @@ npm install -g vercel
 # Deploy to Vercel
 vercel --prod
 ```
+
+### Deployment Troubleshooting
+
+**Common Issues:**
+
+1. **Environment Variables Missing**
+   - Ensure `MONGODB_URI` and `JWT_SECRET` are set in Vercel dashboard
+   - Go to your Vercel project → Settings → Environment Variables
+
+2. **CORS Issues**
+   - Frontend and backend URLs must be correctly configured
+   - Check `frontend/src/services/api.js` for API URL
+   - Verify CORS configuration in `backend/server.js`
+
+3. **Database Connection**
+   - Verify MongoDB Atlas connection string
+   - Ensure IP address is whitelisted in MongoDB Atlas
+   - Check database connectivity via `/health` endpoint
+
+4. **File Upload Issues**
+   - Vercel has file size limits for serverless functions
+   - Large files should be handled differently in production
+   - Consider using cloud storage services (AWS S3, Cloudinary)
+
+**Deployment Status:**
+- ✅ **Frontend**: Successfully deployed and accessible
+- ✅ **Backend**: API endpoints working correctly
+- ✅ **Database**: MongoDB Atlas connected and operational
+- ✅ **Authentication**: JWT authentication working
+- ✅ **File Upload**: Video upload functionality active
+- ✅ **Streaming**: Video streaming working with range requests
 
 ## 🧪 Testing
 
