@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getComments } from '../store/slices/commentSlice';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
-import { FaSort, FaFilter } from 'react-icons/fa';
+import { FaSort } from 'react-icons/fa';
 
 const CommentSection = ({ videoId }) => {
   const dispatch = useDispatch();

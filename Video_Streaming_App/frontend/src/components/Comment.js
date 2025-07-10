@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { likeComment, dislikeComment, deleteComment, editComment } from '../store/slices/commentSlice';
-import { FaThumbsUp, FaThumbsDown, FaReply, FaEllipsisH, FaTrash, FaEdit } from 'react-icons/fa';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 
 const Comment = ({ comment, onReply }) => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
-  const [showReplies, setShowReplies] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
 
