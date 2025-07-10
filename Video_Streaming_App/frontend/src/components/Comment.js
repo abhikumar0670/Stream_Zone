@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { likeComment, dislikeComment, deleteComment, editComment } from '../store/slices/commentSlice';
+import { editComment } from '../store/slices/commentSlice';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 
