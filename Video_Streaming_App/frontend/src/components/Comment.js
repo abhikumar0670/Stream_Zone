@@ -15,60 +15,6 @@ const Comment = ({ comment, onReply }) => {
     return null;
   }
 
-  const handleLike = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to like comments');
-      return;
-    }
-    
-    try {
-      await dispatch(likeComment(comment.id)).unwrap();
-      toast.success(comment.isLiked ? 'Like removed' : 'Comment liked');
-    } catch (error) {
-      toast.error('Failed to like comment');
-    }
-  };
-
-  const handleDislike = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to dislike comments');
-      return;
-    }
-    
-    try {
-      await dispatch(dislikeComment(comment.id)).unwrap();
-      toast.success(comment.isDisliked ? 'Dislike removed' : 'Comment disliked');
-    } catch (error) {
-      toast.error('Failed to dislike comment');
-    }
-  };
-
-  const handleReply = () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to reply to comments');
-      return;
-    }
-    onReply(comment.id, comment.author.username);
-  };
-
-  const handleDelete = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to delete comments');
-      return;
-    }
-
-    if (comment.author.id !== user?.id && user?.role !== 'admin') {
-      toast.error('You can only delete your own comments');
-      return;
-    }
-
-    try {
-      await dispatch(deleteComment(comment.id)).unwrap();
-      toast.success('Comment deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete comment');
-    }
-  };
 
   const handleEdit = async () => {
     if (!isAuthenticated) {
