@@ -16,7 +16,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://stream-zone-7vz7rkonw-abhishek-kumars-projects-1de91d80.vercel.app']
+    ? ['https://stream-zone-cn012dput-abhishek-kumars-projects-1de91d80.vercel.app']
     : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true
 }));

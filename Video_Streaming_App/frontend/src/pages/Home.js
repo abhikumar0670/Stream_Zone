@@ -19,7 +19,15 @@ const Home = () => {
   const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
-    dispatch(getVideos());
+    const fetchVideos = async () => {
+      try {
+        await dispatch(getVideos()).unwrap();
+      } catch (error) {
+        console.error('Failed to fetch videos:', error);
+        // You could set some fallback data here if needed
+      }
+    };
+    fetchVideos();
   }, [dispatch]);
 
   const handleVideoClick = (videoId) => {
@@ -45,7 +53,49 @@ const Home = () => {
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>;
+    return (
+      <div className="container">
+        <div style={{
+          textAlign: 'center',
+          padding: '40px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          margin: '20px 0'
+        }}>
+          <h2 style={{ color: '#dc3545', marginBottom: '16px' }}>Connection Error</h2>
+          <p style={{ color: '#6c757d', marginBottom: '20px' }}>
+            {error === 'Failed to fetch videos' 
+              ? 'Unable to connect to the server. The backend API might not be responding.'
+              : error
+            }
+          </p>
+          <button 
+            onClick={() => {
+              dispatch(getVideos());
+            }}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Try Again
+          </button>
+          <div style={{ marginTop: '20px', fontSize: '14px', color: '#6c757d' }}>
+            <p><strong>Troubleshooting:</strong></p>
+            <ul style={{ textAlign: 'left', maxWidth: '400px', margin: '0 auto' }}>
+              <li>Check your internet connection</li>
+              <li>The backend server might be starting up (please wait a moment)</li>
+              <li>Database connection might be initializing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

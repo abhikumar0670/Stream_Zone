@@ -1,9 +1,13 @@
 import axios from 'axios';
 
 // Dynamic API URL based on environment
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://stream-zone-7vz7rkonw-abhishek-kumars-projects-1de91d80.vercel.app/api'
-  : 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || (
+  process.env.NODE_ENV === 'production' 
+    ? 'https://stream-zone-cn012dput-abhishek-kumars-projects-1de91d80.vercel.app/api'
+    : 'http://localhost:5000/api'
+);
+
+console.log('API URL:', API_URL);
 
 // Create axios instance
 const api = axios.create({
@@ -11,6 +15,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor to add token to headers
