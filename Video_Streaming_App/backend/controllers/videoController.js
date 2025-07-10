@@ -1,7 +1,94 @@
 const Video = require('../models/Video');
 const User = require('../models/User');
+const Comment = require('../models/Comment');
 const path = require('path');
 const fs = require('fs');
+const { extractYouTubeId, getYouTubeMetadata, isValidYouTubeUrl } = require('../utils/youtube');
+
+// Add YouTube video
+const addYouTubeVideo = async (req, res) => {
+  try {
+    const { youtubeUrl, title, description, category, tags, visibility } = req.body;
+
+    if (!youtubeUrl) {
+      return res.status(400).json({ message: 'YouTube URL is required' });
+    }
+
+    if (!isValidYouTubeUrl(youtubeUrl)) {
+      return res.status(400).json({ message: 'Please provide a valid YouTube URL' });
+    }
+
+    // Extract YouTube video ID
+    const youtubeId = extractYouTubeId(youtubeUrl);
+    if (!youtubeId) {
+      return res.status(400).json({ message: 'Could not extract video ID from YouTube URL' });
+    }
+
+    // Check if video already exists
+    const existingVideo = await Video.findOne({ youtubeId, uploader: req.user.id });
+    if (existingVideo) {
+      return res.status(400).json({ message: 'This YouTube video has already been added to your channel' });
+    }
+
+    // Fetch YouTube metadata
+    let youtubeMetadata;
+    try {
+      youtubeMetadata = await getYouTubeMetadata(youtubeId);
+    } catch (error) {
+      console.error('Error fetching YouTube metadata:', error);
+      // Continue without metadata if fetch fails
+      youtubeMetadata = {
+        title: title || 'YouTube Video',
+        description: description || '',
+        thumbnail: null,
+        author: 'Unknown',
+        authorUrl: null
+      };
+    }
+
+    // Parse tags if provided
+    let videoTags = [];
+    if (tags) {
+      videoTags = typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : tags;
+    }
+
+    // Create video record
+    const video = new Video({
+      title: title || youtubeMetadata.title,
+      description: description || youtubeMetadata.description,
+      videoType: 'youtube',
+      youtubeUrl,
+      youtubeId,
+      thumbnail: youtubeMetadata.thumbnail,
+      videoUrl: `https://www.youtube.com/embed/${youtubeId}`,
+      uploader: req.user.id,
+      category: category || 'Other',
+      tags: videoTags,
+      visibility: visibility || 'public'
+    });
+
+    await video.save();
+
+    res.status(201).json({
+      message: 'YouTube video added successfully',
+      video: {
+        id: video._id,
+        title: video.title,
+        description: video.description,
+        videoUrl: video.videoUrl,
+        thumbnail: video.thumbnail,
+        category: video.category,
+        tags: video.tags,
+        visibility: video.visibility,
+        uploader: req.user.username,
+        createdAt: video.createdAt
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 // Upload video
 const uploadVideo = async (req, res) => {
@@ -32,6 +119,29 @@ const uploadVideo = async (req, res) => {
       visibility: visibility || 'public'
     });
 
+    // Generate thumbnail using ffmpeg
+    const ffmpeg = require('fluent-ffmpeg');
+    const videoPath = path.join(__dirname, '../uploads/videos', req.file.filename);
+    const thumbName = `thumb-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
+    const thumbPath = path.join(__dirname, '../uploads/images', thumbName);
+    const ensureDir = (dir) => { if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); };
+    ensureDir(path.join(__dirname, '../uploads/images'));
+    await new Promise((resolve, reject) => {
+      ffmpeg(videoPath)
+        .on('end', resolve)
+        .on('error', (err) => { console.error('FFmpeg error:', err); resolve(); })
+        .screenshots({
+          count: 1,
+          timemarks: ['5'], // 5 seconds
+          filename: thumbName,
+          folder: path.join(__dirname, '../uploads/images'),
+          size: '480x270'
+        });
+    });
+    if (fs.existsSync(thumbPath)) {
+      video.thumbnail = thumbName;
+    }
+
     await video.save();
 
     res.status(201).json({
@@ -41,7 +151,7 @@ const uploadVideo = async (req, res) => {
         title: video.title,
         description: video.description,
         videoUrl: video.videoUrl,
-        thumbnail: video.thumbnail,
+        thumbnail: video.thumbnail ? `/uploads/images/${video.thumbnail}` : null,
         category: video.category,
         tags: video.tags,
         visibility: video.visibility,
@@ -131,8 +241,7 @@ const getVideos = async (req, res) => {
 const getVideoById = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id)
-      .populate('uploader', 'username avatar bio subscribers')
-      .populate('comments');
+      .populate('uploader', 'username avatar bio');
 
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
@@ -161,6 +270,12 @@ const getVideoById = async (req, res) => {
       });
     }
 
+    // Get subscriber count separately
+    const subscriberCount = await User.findById(video.uploader._id).then(user => user ? user.subscribers.length : 0);
+
+    // Get comment count separately
+    const commentCount = await Comment.countDocuments({ video: video._id });
+
     res.json({
       video: {
         id: video._id,
@@ -178,17 +293,20 @@ const getVideoById = async (req, res) => {
           username: video.uploader.username,
           avatar: video.uploader.avatar,
           bio: video.uploader.bio,
-          subscribersCount: video.uploader.subscribers.length
+          subscribersCount: subscriberCount
         },
-        stats: video.getStats(),
+        stats: {
+          ...video.getStats(),
+          commentsCount: commentCount
+        },
         isLiked: req.user ? video.isLikedBy(req.user.id) : false,
         isDisliked: req.user ? video.isDislikedBy(req.user.id) : false,
         createdAt: video.createdAt
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error in getVideoById:', error);
+    res.status(500).json({ message: 'Server error', details: error.message });
   }
 };
 
@@ -330,6 +448,20 @@ const streamVideo = async (req, res) => {
       return res.status(404).json({ message: 'Video not found' });
     }
 
+    // For YouTube videos, redirect to the YouTube URL
+    if (video.videoType === 'youtube') {
+      return res.redirect(video.videoUrl);
+    }
+
+    // For uploaded videos in production, return an error message
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({ 
+        message: 'Video streaming is not available in production. Please use YouTube videos or implement cloud storage.',
+        videoType: video.videoType
+      });
+    }
+
+    // For development, try to stream from local filesystem
     const videoPath = path.join(__dirname, '../uploads/videos', video.filename);
     
     if (!fs.existsSync(videoPath)) {
@@ -382,17 +514,29 @@ const deleteVideo = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Delete video file
-    const videoPath = path.join(__dirname, '../uploads/videos', video.filename);
-    if (fs.existsSync(videoPath)) {
-      fs.unlinkSync(videoPath);
-    }
-
-    // Delete thumbnail if exists
-    if (video.thumbnail) {
-      const thumbnailPath = path.join(__dirname, '../uploads/images', video.thumbnail);
-      if (fs.existsSync(thumbnailPath)) {
-        fs.unlinkSync(thumbnailPath);
+    // Only delete files for uploaded videos
+    if (video.videoType === 'uploaded') {
+      // Delete video file
+      if (video.filename) {
+        const videoPath = path.join(__dirname, '../uploads/videos', video.filename);
+        if (fs.existsSync(videoPath)) {
+          try {
+            fs.unlinkSync(videoPath);
+          } catch (err) {
+            console.error('Error deleting video file:', err);
+          }
+        }
+      }
+      // Delete thumbnail if exists
+      if (video.thumbnail) {
+        const thumbnailPath = path.join(__dirname, '../uploads/images', video.thumbnail);
+        if (fs.existsSync(thumbnailPath)) {
+          try {
+            fs.unlinkSync(thumbnailPath);
+          } catch (err) {
+            console.error('Error deleting thumbnail:', err);
+          }
+        }
       }
     }
 
@@ -400,7 +544,7 @@ const deleteVideo = async (req, res) => {
 
     res.json({ message: 'Video deleted successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Delete video error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -413,5 +557,6 @@ module.exports = {
   toggleDislike,
   getUserVideos,
   streamVideo,
-  deleteVideo
+  deleteVideo,
+  addYouTubeVideo
 };

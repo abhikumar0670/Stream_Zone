@@ -1,11 +1,13 @@
 const express = require('express');
 const { body } = require('express-validator');
 const { auth } = require('../middleware/auth');
+const { uploadImage, handleMulterError } = require('../middleware/upload');
 const {
   register,
   login,
   getMe,
-  updateProfile
+  updateProfile,
+  updateAvatar
 } = require('../controllers/authController');
 
 const router = express.Router();
@@ -51,5 +53,27 @@ router.put('/profile', auth, [
     .isLength({ max: 500 })
     .withMessage('Bio cannot exceed 500 characters')
 ], updateProfile);
+
+// Upload/update avatar
+router.post('/avatar', auth, uploadImage.single('avatar'), handleMulterError, updateAvatar);
+
+// Test endpoint to check database connection and user count
+router.get('/test', async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const userCount = await User.countDocuments();
+    res.json({ 
+      message: 'Database connection working',
+      userCount,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Test endpoint error:', error);
+    res.status(500).json({ 
+      message: 'Database connection failed',
+      error: error.message 
+    });
+  }
+});
 
 module.exports = router;

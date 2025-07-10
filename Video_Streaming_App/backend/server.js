@@ -60,6 +60,7 @@ app.get('/health', (req, res) => {
 // Define routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/videos', require('./routes/videos'));
+app.use('/api/comments', require('./routes/comments'));
 
 // Serve static files
 app.use('/uploads', express.static('uploads'));

@@ -56,11 +56,22 @@ export const videoAPI = {
       'Content-Type': 'multipart/form-data',
     },
   }),
+  addYouTubeVideo: (videoData) => api.post('/videos/youtube', videoData),
   getUserVideos: (params) => api.get('/videos/user/videos', { params }),
   streamVideo: (id) => `${API_URL}/videos/stream/${id}`,
   likeVideo: (id) => api.post(`/videos/${id}/like`),
   dislikeVideo: (id) => api.post(`/videos/${id}/dislike`),
   deleteVideo: (id) => api.delete(`/videos/${id}`),
+};
+
+// Comment endpoints
+export const commentAPI = {
+  getComments: (videoId) => api.get(`/comments/video/${videoId}`),
+  addComment: (commentData) => api.post('/comments', commentData),
+  editComment: (id, content) => api.put(`/comments/${id}`, { content }),
+  likeComment: (id) => api.post(`/comments/${id}/like`),
+  dislikeComment: (id) => api.post(`/comments/${id}/dislike`),
+  deleteComment: (id) => api.delete(`/comments/${id}`),
 };
 
 export default api;

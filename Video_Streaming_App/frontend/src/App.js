@@ -13,6 +13,7 @@ import VideoWatch from './pages/VideoWatch';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
+import DebugPanel from './components/DebugPanel';
 import './App.css';
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
             />
           </Routes>
         </main>
+        <DebugPanel />
         <ToastContainer
           position="top-right"
           autoClose={5000}

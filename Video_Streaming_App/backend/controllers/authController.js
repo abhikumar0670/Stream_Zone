@@ -7,10 +7,12 @@ const register = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
     const { username, email, password } = req.body;
+    console.log('Registration attempt:', { username, email });
 
     // Check if user already exists
     const existingUser = await User.findOne({ 
@@ -18,6 +20,7 @@ const register = async (req, res) => {
     });
 
     if (existingUser) {
+      console.log('User already exists:', { email: existingUser.email, username: existingUser.username });
       return res.status(400).json({ 
         message: 'User already exists with this email or username' 
       });
@@ -31,6 +34,7 @@ const register = async (req, res) => {
     });
 
     await user.save();
+    console.log('User registered successfully:', { id: user._id, username: user.username, email: user.email });
 
     // Generate token
     const token = generateToken(user._id);
@@ -47,7 +51,7 @@ const register = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -159,9 +163,41 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Upload/update user avatar
+const updateAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Remove old avatar file if exists
+    if (user.avatar) {
+      const path = require('path');
+      const fs = require('fs');
+      const oldPath = path.join(__dirname, '../uploads/images', user.avatar);
+      if (fs.existsSync(oldPath)) {
+        try { fs.unlinkSync(oldPath); } catch (e) { /* ignore */ }
+      }
+    }
+    user.avatar = req.file.filename;
+    await user.save();
+    res.json({
+      message: 'Avatar updated successfully',
+      avatar: `/uploads/images/${user.avatar}`
+    });
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
-  updateProfile
+  updateProfile,
+  updateAvatar
 };
