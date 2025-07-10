@@ -3,7 +3,7 @@ import axios from 'axios';
 // Dynamic API URL based on environment
 const API_URL = process.env.REACT_APP_API_URL || (
   process.env.NODE_ENV === 'production' 
-    ? 'https://stream-zone-cn012dput-abhishek-kumars-projects-1de91d80.vercel.app/api'
+    ? 'https://stream-zone-l98tzxpxa-abhishek-kumars-projects-1de91d80.vercel.app/api'
     : 'http://localhost:5000/api'
 );
 
