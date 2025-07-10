@@ -33,9 +33,6 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "CI": "false",
-    "MONGODB_URI": "@mongodb-uri",
-    "JWT_SECRET": "@jwt-secret",
-    "PORT": "5000"
+    "CI": "false"
   }
 }
