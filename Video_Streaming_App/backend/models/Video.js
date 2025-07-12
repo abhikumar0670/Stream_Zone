@@ -11,17 +11,40 @@ const videoSchema = new mongoose.Schema({
     type: String,
     maxlength: [5000, 'Description cannot exceed 5000 characters']
   },
+  videoType: {
+    type: String,
+    enum: ['uploaded', 'youtube'],
+    default: 'uploaded'
+  },
   filename: {
     type: String,
-    required: [true, 'Video filename is required']
+    required: function() { return this.videoType === 'uploaded'; }
   },
   originalName: {
     type: String,
-    required: [true, 'Original filename is required']
+    required: function() { return this.videoType === 'uploaded'; }
   },
   fileSize: {
     type: Number,
-    required: [true, 'File size is required']
+    required: function() { return this.videoType === 'uploaded'; }
+  },
+  youtubeUrl: {
+    type: String,
+    required: function() { return this.videoType === 'youtube'; },
+    validate: {
+      validator: function(v) {
+        if (this.videoType === 'youtube') {
+          const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+          return youtubeRegex.test(v);
+        }
+        return true;
+      },
+      message: 'Please provide a valid YouTube URL'
+    }
+  },
+  youtubeId: {
+    type: String,
+    required: function() { return this.videoType === 'youtube'; }
   },
   duration: {
     type: Number, // in seconds

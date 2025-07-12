@@ -10,6 +10,12 @@ export const register = createAsyncThunk(
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
+      console.error('Registration error:', error);
+      if (error.response?.data?.errors) {
+        // Handle validation errors
+        const errorMessages = error.response.data.errors.map(err => err.msg).join(', ');
+        return rejectWithValue(errorMessages);
+      }
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }

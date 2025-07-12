@@ -38,6 +38,18 @@ export const uploadVideo = createAsyncThunk(
   }
 );
 
+export const addYouTubeVideo = createAsyncThunk(
+  'video/addYouTubeVideo',
+  async (videoData, { rejectWithValue }) => {
+    try {
+      const response = await videoAPI.addYouTubeVideo(videoData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to add YouTube video');
+    }
+  }
+);
+
 export const getUserVideos = createAsyncThunk(
   'video/getUserVideos',
   async (params, { rejectWithValue }) => {
@@ -157,6 +169,19 @@ const videoSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.uploadProgress = 0;
+      })
+      // Add YouTube Video
+      .addCase(addYouTubeVideo.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addYouTubeVideo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.videos.unshift(action.payload.video);
+      })
+      .addCase(addYouTubeVideo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       // Get User Videos
       .addCase(getUserVideos.pending, (state) => {

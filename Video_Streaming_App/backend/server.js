@@ -16,7 +16,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://stream-zone-7vz7rkonw-abhishek-kumars-projects-1de91d80.vercel.app']
+    ? ['https://stream-zone-l98tzxpxa-abhishek-kumars-projects-1de91d80.vercel.app']
     : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true
 }));
@@ -60,6 +60,7 @@ app.get('/health', (req, res) => {
 // Define routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/videos', require('./routes/videos'));
+app.use('/api/comments', require('./routes/comments'));
 
 // Serve static files
 app.use('/uploads', express.static('uploads'));

@@ -1,9 +1,13 @@
 import axios from 'axios';
 
 // Dynamic API URL based on environment
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://stream-zone-7vz7rkonw-abhishek-kumars-projects-1de91d80.vercel.app/api'
-  : 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || (
+  process.env.NODE_ENV === 'production' 
+    ? 'https://stream-zone-l98tzxpxa-abhishek-kumars-projects-1de91d80.vercel.app/api'
+    : 'http://localhost:5000/api'
+);
+
+console.log('API URL:', API_URL);
 
 // Create axios instance
 const api = axios.create({
@@ -11,6 +15,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor to add token to headers
@@ -56,11 +61,22 @@ export const videoAPI = {
       'Content-Type': 'multipart/form-data',
     },
   }),
+  addYouTubeVideo: (videoData) => api.post('/videos/youtube', videoData),
   getUserVideos: (params) => api.get('/videos/user/videos', { params }),
   streamVideo: (id) => `${API_URL}/videos/stream/${id}`,
   likeVideo: (id) => api.post(`/videos/${id}/like`),
   dislikeVideo: (id) => api.post(`/videos/${id}/dislike`),
   deleteVideo: (id) => api.delete(`/videos/${id}`),
+};
+
+// Comment endpoints
+export const commentAPI = {
+  getComments: (videoId) => api.get(`/comments/video/${videoId}`),
+  addComment: (commentData) => api.post('/comments', commentData),
+  editComment: (id, content) => api.put(`/comments/${id}`, { content }),
+  likeComment: (id) => api.post(`/comments/${id}/like`),
+  dislikeComment: (id) => api.post(`/comments/${id}/dislike`),
+  deleteComment: (id) => api.delete(`/comments/${id}`),
 };
 
 export default api;
